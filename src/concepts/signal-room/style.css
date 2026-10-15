@@ -82,3 +82,9 @@ kbd { font: 11px 'IBM Plex Mono', monospace; border: 1px solid currentColor; bor
   .sr-tag { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) { .sr-dot::after { animation: none; } .sr-eyepiece { animation: none; } }
+.sr-error {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: min(420px, calc(100vw - 32px));
+  margin: 0; padding: 18px 22px; border-radius: 10px; background: var(--gx-bg); color: var(--gx-fg);
+  font: 15px/1.5 var(--gx-font); text-align: center; z-index: 30;
+}
+.sr-error a { color: var(--gx-accent); }

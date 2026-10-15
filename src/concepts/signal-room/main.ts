@@ -5,7 +5,7 @@
  * only draws unlit textured meshes: photographic light at real-time cost.
  */
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { loadGLTFJson } from '../../shared/gltf';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/inter';
 import '@fontsource/ibm-plex-mono';
@@ -100,7 +100,7 @@ function start() {
   let screenMesh: THREE.Mesh | null = null;
   const screen = createScreen();
 
-  new GLTFLoader().load(url('assets/models/signal-room.gltf.json'), (gltf) => {
+  loadGLTFJson(url('assets/models/signal-room.gltf.json'), (p) => loader.progress(p)).then((gltf) => {
     gltf.scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;
@@ -123,7 +123,15 @@ function start() {
     loader.done();
     renderer.render(scene, camera);
     window.__conceptReady = true;
-  }, (e) => e.total && loader.progress(e.loaded / e.total));
+  }).catch((err) => {
+    console.error(err);
+    loader.done(); // never leave the visitor stuck behind the cover
+    const msg = document.createElement('p');
+    msg.className = 'sr-error';
+    msg.innerHTML = `The 3D room could not load on this device. <a href="#gx-text">Read the text version</a> or use the menu above.`;
+    document.body.append(msg);
+    window.__conceptReady = true;
+  });
 
   // --- dust motes drifting in the lamp's cone
   const dust = (() => {

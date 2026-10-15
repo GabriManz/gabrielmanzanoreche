@@ -16,6 +16,7 @@ const pages = {
 export default defineConfig({
   base: './', // relative URLs: the build runs under any path prefix
   build: {
+    assetsInlineLimit: 0, // never inline assets as data: URIs (blocked by strict CSPs)
     rollupOptions: {
       input: Object.fromEntries(Object.entries(pages).map(([k, v]) => [k, resolve(__dirname, v)])),
     },
