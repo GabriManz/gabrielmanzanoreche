@@ -6,3 +6,4 @@ blender/out/
 test-results/
 playwright-report/
 .vite/
+__pycache__/
