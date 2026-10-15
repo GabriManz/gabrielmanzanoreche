@@ -13,7 +13,7 @@ export function openEyepiece() {
   wrap.setAttribute('aria-modal', 'true');
   wrap.setAttribute('aria-label', 'Microscope view');
   wrap.innerHTML = `
-    <div class="sr-ep-view"><canvas width="560" height="560"></canvas><span class="sr-ep-scale">10 µm</span></div>
+    <div class="sr-ep-view"><canvas width="300" height="300"></canvas><span class="sr-ep-scale">10 µm</span></div>
     <div class="sr-ep-text">
       <p class="sr-eyebrow">Through the eyepiece · synthetic fluorescence</p>
       ${sectionHTML('research')}
@@ -26,13 +26,13 @@ export function openEyepiece() {
 
   const cv = wrap.querySelector('canvas')!;
   const g = cv.getContext('2d')!;
-  const N = 560, r = rng(9);
+  const N = 300, r = rng(9), K = N / 560; // geometry authored at 560 px
   const sparks: { x: number; y: number; t: number }[] = [];
   const img = g.createImageData(N, N);
   const base = new Float32Array(N * N);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     // tilted elongated cell with sarcomeric striations (~ every 18 px)
-    const u = (x - N / 2) * 0.94 + (y - N / 2) * 0.34, v = -(x - N / 2) * 0.34 + (y - N / 2) * 0.94;
+    const u = ((x - N / 2) * 0.94 + (y - N / 2) * 0.34) / K, v = (-(x - N / 2) * 0.34 + (y - N / 2) * 0.94) / K;
     const cell = Math.exp(-Math.pow(v / 120, 6)) * Math.exp(-Math.pow(u / 330, 8));
     const stri = 0.75 + 0.25 * Math.cos((u / 18) * Math.PI * 2);
     base[y * N + x] = cell * stri * (0.22 + 0.06 * r());
@@ -42,7 +42,7 @@ export function openEyepiece() {
   const frame = () => {
     t += 1;
     if (r() < 0.08) {
-      const u = (r() - 0.5) * 560, v = (r() - 0.5) * 200;
+      const u = (r() - 0.5) * 560 * K, v = (r() - 0.5) * 200 * K;
       sparks.push({ x: N / 2 + u * 0.94 - v * 0.34, y: N / 2 + u * 0.34 + v * 0.94, t: 0 });
     }
     const d = img.data;
@@ -52,7 +52,7 @@ export function openEyepiece() {
       for (const s of sparks) {
         const dx = x - s.x, dy = y - s.y;
         const amp = s.t < 4 ? s.t / 4 : Math.exp(-(s.t - 4) / 12);
-        const w = 9 + s.t * 0.6;
+        const w = (9 + s.t * 0.6) * K;
         const q = (dx * dx + dy * dy) / (w * w);
         if (q < 9) f += amp * 1.1 * Math.exp(-q) * (base[i] > 0.05 ? 1 : 0.2);
       }
