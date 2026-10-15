@@ -50,3 +50,10 @@
   screen, a weak lamp and a broken city shader (heights read from the wrong axis,
   and `transform_apply` silently baking rotation/location). Fixed → 3/4 camera,
   articulated lamp, code-pattern screen, procedural skyline with the Collserola ridge.
+
+## Preview hosting
+- The build uses `base: './'` and `url()` (src/shared/env.ts) so it runs under any
+  path prefix. A private preview is published as a claude.ai artifact (no cost).
+- That host does not serve `.glb`, so models ship as self-contained glTF JSON
+  (`scripts/glb-to-json.mjs`, run automatically by `blender/bake.py`). ~30 % larger
+  than GLB before gzip; revisit (GLB + KTX2 + meshopt) for production hosting.

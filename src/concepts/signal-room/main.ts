@@ -100,7 +100,7 @@ function start() {
   let screenMesh: THREE.Mesh | null = null;
   const screen = createScreen();
 
-  new GLTFLoader().load(url('assets/models/signal-room.glb'), (gltf) => {
+  new GLTFLoader().load(url('assets/models/signal-room.gltf.json'), (gltf) => {
     gltf.scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;

@@ -176,3 +176,7 @@ def run(groups, name, size=2048, samples=128, do_bake=True, do_export=True, keep
                               export_image_format='WEBP', export_image_quality=88, export_cameras=True,
                               export_lights=False, export_extras=True, export_materials='EXPORT')
     lib.log(f'exported {os.path.relpath(path, lib.ROOT)} ({os.path.getsize(path) / 1e6:.2f} MB)')
+    # ship as self-contained glTF JSON (served everywhere); the .glb stays a scratch file
+    import subprocess
+    subprocess.run(['node', os.path.join(lib.ROOT, 'scripts', 'glb-to-json.mjs'), path], check=True)
+    os.remove(path)
