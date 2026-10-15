@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+*.blend1
+blender/out/
+test-results/
+playwright-report/
+.vite/

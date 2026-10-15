@@ -1,0 +1,84 @@
+/* Shared chrome. Concepts theme it by overriding these tokens on :root. */
+:root {
+  --gx-fg: #f2ede4;
+  --gx-muted: rgba(242, 237, 228, 0.6);
+  --gx-bg: rgba(12, 12, 14, 0.72);
+  --gx-accent: #ffb35c;
+  --gx-font: 'Inter', system-ui, sans-serif;
+  --gx-display: var(--gx-font);
+  --gx-radius: 10px;
+}
+
+.gx-nav {
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 20px; font: 500 13px/1 var(--gx-font); color: var(--gx-fg);
+  pointer-events: none;
+}
+.gx-nav > * { pointer-events: auto; }
+.gx-home { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+.gx-mark {
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid currentColor; font: 600 13px/1 var(--gx-display);
+}
+.gx-name { font-family: var(--gx-display); letter-spacing: .02em; }
+.gx-nav nav { display: flex; gap: 4px; margin-left: auto; }
+.gx-nav nav button {
+  background: none; border: 0; color: inherit; font: inherit; cursor: pointer;
+  padding: 8px 10px; border-radius: 6px; opacity: .8;
+}
+.gx-nav nav button:hover, .gx-nav nav button:focus-visible { opacity: 1; background: var(--gx-bg); }
+.gx-badge {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--gx-muted);
+  border: 1px solid currentColor; padding: 5px 8px; border-radius: 99px;
+}
+.gx-skip { position: absolute; left: -9999px; }
+.gx-skip:focus { left: 20px; top: 50px; background: var(--gx-bg); padding: 8px; color: var(--gx-fg); }
+:focus-visible { outline: 2px solid var(--gx-accent); outline-offset: 2px; }
+
+.gx-dialog {
+  max-width: min(560px, calc(100vw - 32px)); width: 100%; max-height: min(80vh, 720px);
+  border: 1px solid rgba(255,255,255,.12); border-radius: var(--gx-radius);
+  background: var(--gx-bg); color: var(--gx-fg); backdrop-filter: blur(18px);
+  padding: 28px 28px 20px; font: 400 15px/1.55 var(--gx-font);
+}
+.gx-dialog::backdrop { background: rgba(0,0,0,.45); }
+.gx-dialog h2 { font: 600 24px/1.2 var(--gx-display); margin: 0 0 16px; color: var(--gx-accent); }
+.gx-dialog h3 { font-size: 15px; margin: 18px 0 4px; }
+.gx-dialog p { margin: 0; color: var(--gx-muted); }
+.gx-dialog a { color: var(--gx-accent); }
+.gx-close {
+  position: absolute; top: 10px; right: 12px; background: none; border: 0; color: var(--gx-fg);
+  font-size: 26px; cursor: pointer; line-height: 1;
+}
+.is-placeholder { opacity: .75; border-left: 2px dashed var(--gx-accent); padding-left: 10px; }
+
+/* Text version: visually hidden but available to AT and via skip link. */
+.gx-text {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
+}
+.gx-text:target, .gx-no-webgl .gx-text {
+  position: relative; width: auto; height: auto; clip: auto; overflow: visible;
+  max-width: 680px; margin: 80px auto; padding: 0 16px; color: var(--gx-fg);
+  font: 400 16px/1.6 var(--gx-font); z-index: 40; background: var(--gx-bg);
+}
+.gx-fallback { position: fixed; inset: auto 16px 16px; color: var(--gx-fg); font: 14px var(--gx-font); }
+
+.gx-loader {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; gap: 12px;
+  background: #050506; color: var(--gx-fg); font: 500 11px/1 var(--gx-font);
+  letter-spacing: .2em; text-transform: uppercase; transition: opacity .8s ease;
+}
+.gx-loader.is-done { opacity: 0; pointer-events: none; }
+.gx-loader-bar { width: 180px; height: 1px; background: rgba(255,255,255,.15); }
+.gx-loader-bar i { display: block; height: 100%; width: 0; background: var(--gx-accent); transition: width .3s; }
+
+@media (max-width: 640px) {
+  .gx-name, .gx-badge { display: none; }
+  .gx-nav { padding: 10px 12px; }
+  .gx-nav nav button { padding: 8px 6px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+  .gx-loader { transition: none; }
+}

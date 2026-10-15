@@ -1,0 +1,44 @@
+{
+  "name": "gabriel-universe",
+  "version": "1.0.0",
+  "description": "GABRIEL — an interactive personal universe (concept prototypes)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit",
+    "shots": "node tests/screenshots.mjs",
+    "blender:signal-room": "/opt/bpyenv/bin/python blender/signal_room.py",
+    "blender:archive": "/opt/bpyenv/bin/python blender/research_archive.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabriManz/gabrielmanzanoreche.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/GabriManz/gabrielmanzanoreche/issues"
+  },
+  "homepage": "https://github.com/GabriManz/gabrielmanzanoreche#readme",
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
+    "@fontsource/vt323": "^5.3.0",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/three": "^0.170.0",
+    "typescript": "5.6",
+    "vite": "^6.4.4"
+  },
+  "private": true,
+  "type": "module"
+}
