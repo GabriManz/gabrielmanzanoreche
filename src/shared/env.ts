@@ -25,3 +25,11 @@ export function rng(seed = 1): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+/**
+ * Resolve a site-root-relative path so the build works under any URL prefix
+ * (local preview, static host sub-folder, artifact preview). Built chunks live in
+ * `<root>/assets/`, so the site root is one level above this module.
+ */
+export const ROOT = import.meta.env.DEV ? '/' : new URL('../', import.meta.url).href;
+export const url = (p: string) => ROOT + p.replace(/^\//, '');

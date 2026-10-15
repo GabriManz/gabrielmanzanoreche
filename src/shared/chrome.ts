@@ -6,7 +6,7 @@
  */
 import './chrome.css';
 import { sections, person, type SectionKey } from './content';
-import { hasWebGL } from './env';
+import { hasWebGL, url } from './env';
 
 export interface ChromeOptions {
   concept: string;          // human name, e.g. "The Signal Room"
@@ -50,7 +50,7 @@ export function mountChrome(opts: ChromeOptions) {
   nav.className = 'gx-nav';
   nav.innerHTML = `
     <a class="gx-skip" href="#gx-text">Skip to text version</a>
-    <a class="gx-home" href="/concepts/" title="Back to concept index">
+    <a class="gx-home" href="${url('concepts/index.html')}" title="Back to concept index">
       <span class="gx-mark">G</span><span class="gx-name">${person.name}</span>
     </a>
     <nav aria-label="Primary">

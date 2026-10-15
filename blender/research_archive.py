@@ -23,9 +23,10 @@ from lib import box, cyl, cone, sphere, plane, join, kelvin  # noqa: E402
 
 ARGS = sys.argv[1:]
 FAST = '--fast' in ARGS
-SAMPLES = int(ARGS[ARGS.index('--samples') + 1]) if '--samples' in ARGS else (16 if FAST else 96)
+SAMPLES = int(ARGS[ARGS.index('--samples') + 1]) if '--samples' in ARGS else (16 if FAST else 48)
 ONLY = ARGS[ARGS.index('--only') + 1] if '--only' in ARGS else None
-RES = (800, 450) if FAST else (1920, 1080)
+META_ONLY = '--meta' in ARGS  # only (re)write the projected hotspot/screen JSON
+RES = (800, 450) if FAST else (1600, 900)
 
 scn = lib.reset()
 R = lib.rand(21)
@@ -49,7 +50,7 @@ M = {
 }
 
 
-def crt_material(name, color, strength=2.2, seed=0.0):
+def crt_material(name, color, strength=5.0, seed=0.0):
     m = bpy.data.materials.new(name)
     ns, ls = lib.nodes(m)
     ns.clear()
@@ -58,14 +59,14 @@ def crt_material(name, color, strength=2.2, seed=0.0):
     mp = ns.new('ShaderNodeMapping'); mp.inputs['Location'].default_value = (seed, seed * 0.37, 0)
     ls.new(tc.outputs['UV'], mp.inputs['Vector'])
     br = ns.new('ShaderNodeTexBrick')
-    br.inputs['Scale'].default_value = 6.0
-    br.inputs['Brick Width'].default_value = 0.5
-    br.inputs['Row Height'].default_value = 0.1
+    br.inputs['Scale'].default_value = 8.0
+    br.inputs['Brick Width'].default_value = 0.45
+    br.inputs['Row Height'].default_value = 0.075
     br.inputs['Mortar Size'].default_value = 0.04
     br.inputs['Color1'].default_value = (0.0, 0.0, 0.0, 1)
     br.inputs['Color2'].default_value = (1, 1, 1, 1)
     br.inputs['Mortar'].default_value = (0, 0, 0, 1)
-    br.inputs['Bias'].default_value = 0.3
+    br.inputs['Bias'].default_value = -0.55
     ls.new(mp.outputs[0], br.inputs['Vector'])
     wv = ns.new('ShaderNodeTexWave'); wv.wave_type = 'BANDS'; wv.bands_direction = 'Y'
     wv.inputs['Scale'].default_value = 60
@@ -89,8 +90,8 @@ AMBER = (1.0, 0.55, 0.12)
 PHOSPHOR = (0.35, 1.0, 0.55)
 
 # ------------------------------------------------------------------ architecture
-L0, L1, HW, HH = -1.5, 14.0, 2.0, 5.2   # aisle length range, half width, height
-WALL_END = 13.6
+L0, L1, HW, HH = -1.5, 11.8, 2.0, 5.2   # aisle length range, half width, height
+WALL_END = 11.4
 plane('floor', (2 * HW + 2, L1 - L0), (0, (L0 + L1) / 2, 0), mat=M['floor'])
 plane('ceiling', (2 * HW + 2, L1 - L0), (0, (L0 + L1) / 2, HH), rot=(math.pi, 0, 0), mat=M['ceiling'])
 for s in (-1, 1):
@@ -111,7 +112,7 @@ join('window', mull)
 box('wall_back', (2 * HW, 0.2, HH), (0, L0 - 0.1, HH / 2), mat=M['wall'])
 
 # ------------------------------------------------------------------ cabinet walls of drawers (array modifiers)
-CAB_X, ROWS, DW, DH, Y0, Y1 = 1.62, 8, 0.44, 0.38, -1.2, 11.8
+CAB_X, ROWS, DW, DH, Y0, Y1 = 1.62, 8, 0.44, 0.38, -1.2, 9.8
 COLS = int((Y1 - Y0) / DW)
 for s in (-1, 1):
     face = CAB_X - 0.32
@@ -139,17 +140,18 @@ for i in range(22):
 join('open_drawer', dr)
 
 # ------------------------------------------------------------------ rolling library ladder (right side)
-ly = 5.2
-lad = [lib.rod('rail', (CAB_X - 0.4 - 1.0, ly + s_, 0.02), (CAB_X - 0.42, ly + s_, 3.3), 0.018, mat=M['brass']) for s_ in (-0.22, 0.22)]
+ly = 4.1
+FOOT = CAB_X - 0.32 - 0.8
+lad = [lib.rod('rail', (FOOT, ly + s_, 0.02), (CAB_X - 0.4, ly + s_, 3.3), 0.022, mat=M['brass']) for s_ in (-0.26, 0.26)]
 for i in range(10):
     f = (i + 0.5) / 10
-    lad.append(lib.rod('rung', (CAB_X - 1.4 + f * 0.98, ly - 0.22, 0.02 + f * 3.28), (CAB_X - 1.4 + f * 0.98, ly + 0.22, 0.02 + f * 3.28),
-                       0.012, mat=M['brass']))
+    xr = FOOT + f * (CAB_X - 0.4 - FOOT)
+    lad.append(lib.rod('rung', (xr, ly - 0.26, 0.02 + f * 3.28), (xr, ly + 0.26, 0.02 + f * 3.28), 0.014, mat=M['brass']))
 lad.append(cyl('hookrail', 0.015, Y1 - Y0, (CAB_X - 0.4, (Y0 + Y1) / 2, 3.35), rot=(math.pi / 2, 0, 0), mat=M['brass']))
 join('ladder', lad)
 
 # ------------------------------------------------------------------ film trolley (left aisle)
-tx, ty = -0.62, 7.4
+tx, ty = -0.62, 6.1
 tro = [box('tray', (0.5, 0.8, 0.02), (tx, ty, z), mat=M['green_metal'], bevel=0.005) for z in (0.25, 0.85)]
 for sx in (-0.23, 0.23):
     for sy in (-0.38, 0.38):
@@ -164,7 +166,7 @@ for k in range(4):
 join('film_trolley', tro)
 
 # ------------------------------------------------------------------ console with CRTs
-CY = 12.75
+CY = 10.6
 con = [box('console', (2.6, 0.85, 0.8), (0, CY, 0.4), mat=M['green_metal'], bevel=0.02),
        box('console_top', (2.7, 0.95, 0.04), (0, CY, 0.82), mat=M['black'], bevel=0.01),
        box('kbd', (0.5, 0.18, 0.03), (0, CY - 0.28, 0.855), rot=(0.08, 0, 0), mat=M['beige'], bevel=0.008)]
@@ -192,26 +194,26 @@ for name, x, rotz, col in (('crt_left', -0.85, 0.35, PHOSPHOR), ('crt_main', 0.0
         ob.location = pivot + off
         ob.rotation_euler.z += rotz
     SCREENS[name] = scr
-    lib.light(f'{name}_glow', 'AREA', (c.x, c.y - 0.3, c.z), 4, col, size=(0.35, 0.28)).rotation_euler = (math.pi / 2, 0, rotz)
+    lib.light(f'{name}_glow', 'AREA', (c.x, c.y - 0.3, c.z), 14, col, size=(0.35, 0.28)).rotation_euler = (math.pi / 2, 0, rotz)
 
 # light table + slides on the right of the console
-lt = [box('lt_body', (0.7, 0.5, 0.06), (1.35, 11.9, 0.86), rot=(0.25, 0, -0.2), mat=M['black'], bevel=0.01)]
+lt = [box('lt_body', (0.7, 0.5, 0.06), (1.35, 9.75, 0.86), rot=(0.25, 0, -0.2), mat=M['black'], bevel=0.01)]
 join('lt', lt)
-plane('lt_glass', (0.62, 0.42), (1.35, 11.9 - 0.008, 0.893), rot=(0.25, 0, -0.2), mat=M['lighttable'])
+plane('lt_glass', (0.62, 0.42), (1.35, 9.75 - 0.008, 0.893), rot=(0.25, 0, -0.2), mat=M['lighttable'])
 
 # ------------------------------------------------------------------ hanging lamps
-HANG = [1.8, 4.6, 7.4, 10.2]
+HANG = [1.6, 4.3, 7.0, 9.7]
 for i, y in enumerate(HANG):
     z = 3.25
     join(f'lamp{i}', [cyl('cord', 0.006, HH - z - 0.15, (0, y, (HH + z) / 2 + 0.07), mat=M['black']),
-                      cone('shade', 0.28, 0.05, 0.22, (0, y, z), mat=M['green_metal'])])
+                      cone('shade', 0.28, 0.05, 0.22, (0, y, z), mat=M['green_metal'], open_shell=0.004)])
     sphere(f'bulb{i}', 0.045, (0, y, z - 0.08), mat=M['bulb'])
-    sp = lib.light(f'spot{i}', 'SPOT', (0, y, z - 0.1), 380, kelvin(3200), size=0.05, spot=70, blend=0.45)
+    sp = lib.light(f'spot{i}', 'SPOT', (0, y, z - 0.1), 1100, kelvin(2700), size=0.05, spot=70, blend=0.45)
     sp.rotation_euler = (0, 0, 0)  # spot lights point down -Z by default
 
 # ------------------------------------------------------------------ atmosphere: moonlight through window + haze
-moon = lib.light('moon', 'AREA', (0, WALL_END + 1.2, 3.9), 900, (0.45, 0.6, 1.0), size=(1.5, 2.8))
-lib.look_at(moon, (0.4, 6.0, 0.0))
+moon = lib.light('moon', 'AREA', (0, WALL_END + 1.2, 3.9), 650, (0.45, 0.6, 1.0), size=(1.5, 2.8))
+lib.look_at(moon, (0.4, 4.5, 0.0))
 lib.light('sky_fill', 'AREA', (0, WALL_END + 0.5, 3.25), 60, (0.4, 0.55, 0.9), size=(1.4, 2.7)).rotation_euler = (math.pi / 2, 0, 0)
 lib.world((0.01, 0.015, 0.03), (0.02, 0.03, 0.05), strength=0.4)
 haze = box('haze', (2 * HW - 0.02, L1 - L0 - 0.02, HH - 0.02), (0, (L0 + L1) / 2, HH / 2))
@@ -230,10 +232,10 @@ haze.data.materials.append(hm)
 PLATES = {
     'hall': dict(loc=(0.42, -0.9, 1.62), tgt=(-0.05, 12.0, 1.45), lens=26,
                  spots={'drawers': OPEN + Vector((0.2, 0, 0.05)), 'console': Vector((0, CY - 0.1, 1.15)),
-                        'trolley': Vector((tx, ty, 1.0)), 'ladder': Vector((CAB_X - 0.9, ly, 1.6)),
+                        'trolley': Vector((tx, ty, 1.0)), 'ladder': Vector((CAB_X - 0.75, ly, 1.7)),
                         'window': Vector((0, WALL_END, 3.3))}),
-    'console': dict(loc=(0.12, 11.05, 1.42), tgt=(0.0, CY, 1.08), lens=32,
-                    spots={'lighttable': Vector((1.35, 11.9, 0.9)), 'crt_left': Vector((-0.85, CY - 0.1, 1.12))}),
+    'console': dict(loc=(0.12, 8.95, 1.42), tgt=(0.0, CY, 1.08), lens=32,
+                    spots={'lighttable': Vector((1.35, 9.75, 0.9)), 'crt_left': Vector((-0.85, CY - 0.1, 1.12))}),
 }
 
 
@@ -267,10 +269,12 @@ for name, p in PLATES.items():
     if ONLY and name != ONLY:
         continue
     cam = lib.camera(f'cam_{name}', p['loc'], p['tgt'], lens=p['lens'])
+    bpy.context.view_layer.update()  # refresh matrix_world (needed when no render runs)
     lib.cycles(samples=SAMPLES, w=RES[0], h=RES[1], bounces=6)
     scn.cycles.volume_bounces = 1
     scn.cycles.volume_step_rate = 4.0 if FAST else 2.0
-    lib.render_still(os.path.join(outdir, f'archive-{name}.jpg'), quality=86)
+    if not META_ONLY:
+        lib.render_still(os.path.join(outdir, f'archive-{name}.jpg'), quality=86)
     # depth plate (no haze, emission override, 1 spp)
     haze.hide_render = True
     scn.view_layers[0].material_override = depth_material()
@@ -279,7 +283,8 @@ for name, p in PLATES.items():
     vt, look, ex = scn.view_settings.view_transform, scn.view_settings.look, scn.view_settings.exposure
     scn.view_settings.view_transform, scn.view_settings.look, scn.view_settings.exposure = 'Standard', 'None', 0
     scn.render.resolution_x, scn.render.resolution_y = RES[0] // 2, RES[1] // 2
-    lib.render_still(os.path.join(outdir, f'archive-{name}-depth.jpg'), quality=90)
+    if not META_ONLY:
+        lib.render_still(os.path.join(outdir, f'archive-{name}-depth.jpg'), quality=90)
     scn.view_layers[0].material_override = None
     scn.view_settings.view_transform, scn.view_settings.look, scn.view_settings.exposure = vt, look, ex
     haze.hide_render = False
@@ -290,7 +295,7 @@ for name, p in PLATES.items():
         scr[sname] = [project(cam, c) for c in corners]
     meta[name] = {'spots': {k: project(cam, v) for k, v in p['spots'].items()}, 'screens': scr, 'aspect': RES[0] / RES[1]}
 
-if not FAST:
+if not FAST or META_ONLY:
     path = os.path.join(lib.PUBLIC, 'renders', 'archive-plates.json')
     old = json.load(open(path)) if os.path.exists(path) else {}
     old.update(meta)

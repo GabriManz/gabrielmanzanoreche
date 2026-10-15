@@ -12,7 +12,7 @@ import '@fontsource/ibm-plex-mono';
 import './style.css';
 import { mountChrome, createLoader, openPanel, onPanelClose, sectionHTML } from '../../shared/chrome';
 import { person } from '../../shared/content';
-import { prefersReducedMotion, isTouch } from '../../shared/env';
+import { prefersReducedMotion, isTouch, url } from '../../shared/env';
 import { createScreen } from './screen';
 import { openEyepiece } from './eyepiece';
 
@@ -47,7 +47,7 @@ if (ok) start();
 function start() {
   const reduced = prefersReducedMotion();
   const loader = createLoader('Switching on the desk lamp');
-  document.querySelector('.gx-loader')?.setAttribute('style', `background:#050506 url(/assets/renders/signal-room-hero.jpg) center/cover`);
+  document.querySelector('.gx-loader')?.setAttribute('style', `background:#050506 url(${url('assets/renders/signal-room-hero.jpg')}) center/cover`);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch() ? 1.5 : 2));
@@ -71,7 +71,7 @@ function start() {
   Object.assign(view, { pos: heroView().pos.clone(), target: heroView().target.clone(), focal: heroView().focal });
 
   // --- city backdrop behind the window (Cycles render of the procedural city)
-  const cityTex = new THREE.TextureLoader().load('/assets/textures/signal-room-city.jpg');
+  const cityTex = new THREE.TextureLoader().load(url('assets/textures/signal-room-city.jpg'));
   cityTex.colorSpace = THREE.SRGBColorSpace;
   const cityMat = new THREE.ShaderMaterial({
     uniforms: { map: { value: cityTex }, t: { value: 0 } },
@@ -100,7 +100,7 @@ function start() {
   let screenMesh: THREE.Mesh | null = null;
   const screen = createScreen();
 
-  new GLTFLoader().load('/assets/models/signal-room.glb', (gltf) => {
+  new GLTFLoader().load(url('assets/models/signal-room.glb'), (gltf) => {
     gltf.scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;

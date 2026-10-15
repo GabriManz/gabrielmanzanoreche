@@ -14,6 +14,7 @@ const pages = {
 };
 
 export default defineConfig({
+  base: './', // relative URLs: the build runs under any path prefix
   build: {
     rollupOptions: {
       input: Object.fromEntries(Object.entries(pages).map(([k, v]) => [k, resolve(__dirname, v)])),

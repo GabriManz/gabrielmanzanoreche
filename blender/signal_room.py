@@ -176,7 +176,7 @@ lamp = [
     lib.rod('lamp_arm2', ELBOW, (HEAD[0] + 0.03, HEAD[1] + 0.04, HEAD[2] + 0.05), 0.008, mat=M['iron']),
     sphere('lamp_joint', 0.02, ELBOW, mat=M['brass']),
     sphere('lamp_joint2', 0.016, (HEAD[0] + 0.03, HEAD[1] + 0.04, HEAD[2] + 0.05), mat=M['brass']),
-    cone('lamp_shade', 0.09, 0.035, 0.14, HEAD, rot=(0.35, 0.25, 0), mat=M['iron']),
+    cone('lamp_shade', 0.09, 0.035, 0.14, HEAD, rot=(0.35, 0.25, 0), mat=M['iron'], open_shell=0.003),
 ]
 interactive['lamp'] = join('lamp', lamp)
 bulb = sphere('lamp_bulb', 0.024, (HEAD[0], HEAD[1] - 0.01, HEAD[2] - 0.04), mat=M['bulb'])

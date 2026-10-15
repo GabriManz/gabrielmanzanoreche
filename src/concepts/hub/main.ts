@@ -4,6 +4,7 @@ import '@fontsource-variable/inter';
 import '@fontsource/ibm-plex-mono';
 import './style.css';
 import { person } from '../../shared/content';
+import { url } from '../../shared/env';
 
 const CONCEPTS = [
   {
@@ -47,8 +48,8 @@ document.body.innerHTML = `
 </header>
 <main class="hub-grid">
   ${CONCEPTS.map((c) => `
-  <a class="hub-card" href="/concepts/${c.slug}/">
-    <figure><img src="/assets/thumbs/${c.slug}.jpg" alt="Screenshot of ${c.name}" loading="lazy" /></figure>
+  <a class="hub-card" href="${url(`concepts/${c.slug}/index.html`)}">
+    <figure><img src="${url(`assets/thumbs/${c.slug}.jpg`)}" alt="Screenshot of ${c.name}" loading="lazy" /></figure>
     <div class="hub-meta">
       <span class="hub-letter">${c.letter}</span>
       <h2>${c.name}</h2>

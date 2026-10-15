@@ -11,7 +11,7 @@ import '@fontsource/ibm-plex-sans-condensed/600.css';
 import '@fontsource/vt323';
 import './style.css';
 import { mountChrome, createLoader, openPanel } from '../../shared/chrome';
-import { prefersReducedMotion } from '../../shared/env';
+import { prefersReducedMotion, url } from '../../shared/env';
 import { mountTerminal } from './terminal';
 import { openCatalogue } from './catalogue';
 import { fitQuad } from './homography';
@@ -43,14 +43,14 @@ if (ok) start();
 async function start() {
   const reduced = prefersReducedMotion();
   const loader = createLoader('Opening the stacks');
-  const meta: Record<string, PlateMeta> = await (await fetch('/assets/renders/archive-plates.json')).json();
+  const meta: Record<string, PlateMeta> = await (await fetch(url('assets/renders/archive-plates.json'))).json();
   const tl = new THREE.TextureLoader();
   const load = (u: string) => new Promise<THREE.Texture>((res) => tl.load(u, res));
   const names = Object.keys(meta);
   let done = 0;
   const tex: Record<string, { color: THREE.Texture; depth: THREE.Texture }> = {};
   await Promise.all(names.map(async (n) => {
-    const [color, depth] = await Promise.all([load(`/assets/renders/archive-${n}.jpg`), load(`/assets/renders/archive-${n}-depth.jpg`)]);
+    const [color, depth] = await Promise.all([load(url(`assets/renders/archive-${n}.jpg`)), load(url(`assets/renders/archive-${n}-depth.jpg`))]);
     color.colorSpace = THREE.SRGBColorSpace;
     tex[n] = { color, depth };
     loader.progress(++done / names.length);

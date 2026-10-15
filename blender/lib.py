@@ -78,10 +78,14 @@ def rod(name, p0, p1, r, mat=None, verts=16):
     return o
 
 
-def cone(name, r1, r2, depth, loc, rot=(0, 0, 0), mat=None, verts=32):
-    bpy.ops.mesh.primitive_cone_add(radius1=r1, radius2=r2, depth=depth, location=loc, rotation=rot, vertices=verts)
+def cone(name, r1, r2, depth, loc, rot=(0, 0, 0), mat=None, verts=32, open_shell=0.0):
+    """open_shell > 0 → no caps + solidify of that thickness (lamp shades that let light out)."""
+    bpy.ops.mesh.primitive_cone_add(radius1=r1, radius2=r2, depth=depth, location=loc, rotation=rot, vertices=verts,
+                                    end_fill_type='NOTHING' if open_shell else 'NGON')
     o = bpy.context.active_object
     o.name = name
+    if open_shell:
+        o.modifiers.new('shell', 'SOLIDIFY').thickness = open_shell
     if mat:
         o.data.materials.append(mat)
     shade_smooth(o)
