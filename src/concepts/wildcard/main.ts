@@ -6,6 +6,7 @@
  * Illustrative model only — not a patient-specific simulation.
  */
 import '@fontsource-variable/space-grotesk';
+import { mountChapterNav } from '../../shared/chapters';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import './style.css';
@@ -27,6 +28,7 @@ const ok = mountChrome({
   status: 'Concept D prototype — Barkley excitable-media model driving a stylised Eixample at night',
   needsWebGL: true,
 });
+mountChapterNav('wildcard', 'top');
 
 if (ok) start();
 

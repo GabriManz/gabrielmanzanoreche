@@ -101,3 +101,15 @@ kbd { font: 11px 'IBM Plex Mono', monospace; border: 1px solid currentColor; bor
 .is-focused .sr-city { opacity: 0; }
 @media (max-width: 760px) { .sr-city { left: 16px; right: auto; text-align: left; bottom: auto; top: 64px; } .sr-city b { font-size: 22px; } }
 @media (prefers-reduced-motion: reduce) { .sr-city.is-in { animation: none; } }
+.sr-ep-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.sr-ep-actions .sr-ep-close { margin-top: 0; }
+.sr-ep-dive {
+  background: var(--gx-accent); color: #1a1006; border: 0; border-radius: 99px; padding: 11px 20px;
+  font: 600 13px var(--gx-font); cursor: pointer;
+}
+.sr-city-go {
+  justify-self: end; margin-top: 8px; pointer-events: auto; cursor: pointer; border: 1px solid var(--gx-accent);
+  background: var(--gx-bg); color: var(--gx-fg); border-radius: 99px; padding: 8px 14px; font: 500 12px var(--gx-font);
+}
+.sr-city-go:hover, .sr-city-go:focus-visible { background: var(--gx-accent); color: #1a1006; }
+@media (max-width: 760px) { .sr-city-go { justify-self: start; } }

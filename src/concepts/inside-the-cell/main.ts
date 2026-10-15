@@ -1,4 +1,5 @@
 import '@fontsource/instrument-serif/400.css';
+import { mountChapterNav } from '../../shared/chapters';
 import '@fontsource/instrument-serif/400-italic.css';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource/ibm-plex-sans/400.css';
@@ -19,6 +20,7 @@ const ok = mountChrome({
   status: 'Concept C prototype — illustrative toy models and synthetic data, not validated physiology',
   needsWebGL: true,
 });
+mountChapterNav('inside-the-cell', 'top');
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 const itemPanel = (i: number) => openPanel({ title: research[i].title, html: `<p>${esc(research[i].body)}</p>` });

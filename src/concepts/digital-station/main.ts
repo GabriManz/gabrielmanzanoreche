@@ -5,6 +5,7 @@
  * (small) detection algorithm on a synthetic confocal frame-scan (x–y–t) movie.
  */
 import '@fontsource/ibm-plex-sans/400.css';
+import { mountChapterNav } from '../../shared/chapters';
 import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-sans/600.css';
 import '@fontsource/ibm-plex-sans/400-italic.css';
@@ -24,6 +25,7 @@ import { paintWallpaper } from './wallpaper';
 import { DEFAULT_SEED, fileName, series, paintRaw, heroFrame } from './analysis';
 
 mountChrome({ concept: 'Digital Research Station', status: 'SPARK/OS desktop · windows, terminal, synthetic SparkLab analysis' });
+mountChapterNav('digital-station', 'menubar');
 document.body.classList.add('ds');
 
 const reduced = prefersReducedMotion();

@@ -7,6 +7,7 @@
 import './chrome.css';
 import { sections, person, type SectionKey } from './content';
 import { hasWebGL, url } from './env';
+import { arrive } from './transition';
 
 export interface ChromeOptions {
   concept: string;          // human name, e.g. "The Signal Room"
@@ -46,6 +47,7 @@ export function onPanelClose(cb: () => void) {
 }
 
 export function mountChrome(opts: ChromeOptions) {
+  arrive(); // finish an iris transition started on the previous page, if any
   const nav = document.createElement('header');
   nav.className = 'gx-nav';
   nav.innerHTML = `

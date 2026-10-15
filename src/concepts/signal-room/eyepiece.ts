@@ -5,6 +5,8 @@
  */
 import { sectionHTML } from '../../shared/chrome';
 import { prefersReducedMotion, rng } from '../../shared/env';
+import { leave } from '../../shared/transition';
+import { CHAPTERS, pageUrl } from '../../shared/chapters';
 
 export function openEyepiece() {
   const wrap = document.createElement('div');
@@ -18,7 +20,10 @@ export function openEyepiece() {
       <p class="sr-eyebrow">Through the eyepiece · synthetic fluorescence</p>
       ${sectionHTML('research')}
       <p class="sr-ep-note">Illustration: a cardiomyocyte with stochastic calcium sparks. Not experimental data.</p>
-      <button class="sr-ep-close">Back to the desk <kbd>Esc</kbd></button>
+      <div class="sr-ep-actions">
+        <button class="sr-ep-dive">Enter the cell · Chapter 1 →</button>
+        <button class="sr-ep-close">Back to the desk <kbd>Esc</kbd></button>
+      </div>
     </div>`;
   document.body.append(wrap);
   const btn = wrap.querySelector<HTMLButtonElement>('.sr-ep-close')!;
@@ -78,5 +83,10 @@ export function openEyepiece() {
   };
   const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
   btn.addEventListener('click', close);
+  wrap.querySelector('.sr-ep-dive')!.addEventListener('click', () => {
+    // close the iris onto the centre of the eyepiece: the field of view becomes the cell
+    const r = wrap.querySelector('.sr-ep-view')!.getBoundingClientRect();
+    leave(pageUrl(CHAPTERS[0].slug), { x: r.left + r.width / 2, y: r.top + r.height / 2, color: CHAPTERS[0].color });
+  });
   addEventListener('keydown', onKey);
 }

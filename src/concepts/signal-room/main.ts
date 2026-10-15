@@ -15,6 +15,8 @@ import { person } from '../../shared/content';
 import { prefersReducedMotion, isTouch, url } from '../../shared/env';
 import { createScreen } from './screen';
 import { openEyepiece } from './eyepiece';
+import { leave } from '../../shared/transition';
+import { CHAPTERS, pageUrl } from '../../shared/chapters';
 import { openCatalogue } from '../../shared/catalogue';
 import { createCityWindow, CITIES } from './cityWindow';
 
@@ -22,8 +24,8 @@ const EXPOSURE = 2.0; // must match blender/bake.py
 
 type Spot = { label: string; kicker: string; open: () => void };
 const SPOTS: Record<string, Spot> = {
-  microscope: { label: 'Microscope', kicker: 'Imaging · calcium signalling', open: () => openEyepiece() },
-  computer: { label: 'Workstation', kicker: 'Software · GitHub', open: () => openPanel('projects') },
+  microscope: { label: 'Microscope', kicker: 'Chapter 1 · What is a spark', open: () => openEyepiece() },
+  computer: { label: 'Workstation', kicker: 'Chapter 2 · How I measure it', open: () => {} }, // handled by enterScreen()
   notebook: { label: 'Research notebook', kicker: 'Records · publications', open: () => openCatalogue('BIBLIOGRAPHY') },
   poster: {
     label: 'Conference poster', kicker: 'Talks · posters',
@@ -77,7 +79,9 @@ function start() {
     reduced,
     onChange: (c) => {
       const n = CITIES.indexOf(c) + 1;
-      caption.innerHTML = `<span>Places I've lived · ${n}/${CITIES.length}</span><b>${c.name}</b><i>${c.landmarks}</i>`;
+      caption.innerHTML = `<span>Places I've lived · ${n}/${CITIES.length}</span><b>${c.name}</b><i>${c.landmarks}</i>` +
+        (c.key === 'barcelona' ? `<button class="sr-city-go">Watch Barcelona beat · Chapter 3 →</button>` : '');
+      caption.querySelector('.sr-city-go')?.addEventListener('click', () => enterCity());
       caption.classList.remove('is-in'); void caption.offsetWidth; caption.classList.add('is-in');
       const w = anchors.find((a) => a.key === 'window');
       if (w) w.el.querySelector('i')!.textContent = `Places I've lived · ${c.name}`;
@@ -204,15 +208,41 @@ function start() {
     if (ray.intersectObject(scene, true)[0]?.object === cityWin.mesh) cityWin.next();
   });
 
-  // --- camera flights
-  let flight: { from: typeof view; to: typeof view; t: number } | null = null;
-  let focused: string | null = null;
-  function flyTo(to: typeof view) {
-    const from = { pos: view.pos.clone(), target: view.target.clone(), focal: view.focal };
-    flight = reduced ? null : { from, to, t: 0 };
-    if (reduced) Object.assign(view, { pos: to.pos.clone(), target: to.target.clone(), focal: to.focal });
+  // --- window → Chapter 3: push towards the glass, then drop into the excitable city
+  function enterCity() {
+    focused = 'window';
+    document.body.classList.add('is-focused');
+    const target = b2t(-0.2, 1.9, 1.75);
+    flyThen({ pos: b2t(-0.05, 1.2, 1.7), target, focal: 22 }, () => leave(pageUrl(CHAPTERS[2].slug), { color: CHAPTERS[2].color }));
   }
+
+  // --- camera flights
+  let flight: { from: typeof view; to: typeof view; t: number; done?: () => void } | null = null;
+  let focused: string | null = null;
+  function flyTo(to: typeof view, done?: () => void) {
+    const from = { pos: view.pos.clone(), target: view.target.clone(), focal: view.focal };
+    flight = reduced ? null : { from, to, t: 0, done };
+    if (reduced) { Object.assign(view, { pos: to.pos.clone(), target: to.target.clone(), focal: to.focal }); done?.(); }
+  }
+  /** Fly, then run `then` once the camera has arrived (with a safety timeout for slow devices). */
+  function flyThen(to: typeof view, then: () => void) {
+    let fired = false;
+    const once = () => { if (!fired) { fired = true; then(); } };
+    flyTo(to, once);
+    setTimeout(once, 4000);
+  }
+  function enterScreen() {
+    if (!screenMesh) return;
+    focused = 'computer';
+    document.body.classList.add('is-focused');
+    const c = new THREE.Box3().setFromObject(screenMesh).getCenter(new THREE.Vector3());
+    // the screen faces the room (+z in three); stop just in front of it, filling the view
+    flyThen({ pos: c.clone().add(new THREE.Vector3(0, 0, innerWidth / innerHeight < 0.9 ? 0.75 : 0.42)), target: c, focal: 26 },
+      () => leave(pageUrl(CHAPTERS[1].slug), { color: CHAPTERS[1].color }));
+  }
+
   function focusOn(key: string) {
+    if (key === 'computer') return enterScreen();
     const o = spotObjs[key];
     if (!o) return;
     focused = key;
@@ -256,7 +286,7 @@ function start() {
       view.pos.lerpVectors(flight.from.pos, flight.to.pos, k);
       view.target.lerpVectors(flight.from.target, flight.to.target, k);
       view.focal = THREE.MathUtils.lerp(flight.from.focal, flight.to.focal, k);
-      if (flight.t >= 1) flight = null;
+      if (flight.t >= 1) { const done = flight.done; flight = null; done?.(); }
     }
     if (!reduced) sway.lerp(mouse, 0.04);
     camera.position.copy(view.pos).add(tmp.set(sway.x * 0.08, -sway.y * 0.04, 0));

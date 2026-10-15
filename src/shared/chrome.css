@@ -82,3 +82,35 @@
   * { scroll-behavior: auto !important; }
   .gx-loader { transition: none; }
 }
+
+/* Iris transition (src/shared/transition.ts): a hole whose huge box-shadow is the curtain */
+.gx-iris {
+  position: fixed; z-index: 300; border-radius: 50%; transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 300vmax var(--iris-color, #050506); pointer-events: auto;
+}
+.gx-iris.is-closing { transition: width .85s cubic-bezier(.7, 0, .84, 0), height .85s cubic-bezier(.7, 0, .84, 0); }
+.gx-iris.is-opening { transition: width 1.2s cubic-bezier(.16, 1, .3, 1), height 1.2s cubic-bezier(.16, 1, .3, 1); pointer-events: none; }
+
+/* Thesis chapter navigation (src/shared/chapters.ts) */
+.gx-chapters {
+  position: fixed; left: 50%; top: 100px; transform: translateX(-50%); z-index: 45;
+  display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 99px;
+  background: var(--gx-bg); border: 1px solid rgba(255, 255, 255, .14); backdrop-filter: blur(12px);
+  font: 500 12px/1 var(--gx-font); color: var(--gx-fg); white-space: nowrap; max-width: calc(100vw - 32px);
+}
+.gx-chapters a { color: inherit; text-decoration: none; padding: 7px 11px; border-radius: 99px; }
+.gx-chapters a:hover, .gx-chapters a:focus-visible { background: rgba(255, 255, 255, .1); }
+.gx-chapters a.is-next { color: var(--gx-accent); }
+.gx-chapters > span { display: flex; gap: 8px; align-items: baseline; padding: 0 8px; }
+.gx-chapters b { font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; color: var(--gx-accent); }
+.gx-chapters i { font-style: normal; color: var(--gx-muted); }
+.gx-chapters.is-menubar { top: 2px; z-index: 9000; padding: 1px; font-size: 11px; background: transparent; border: 0; backdrop-filter: none; }
+.gx-chapters.is-menubar a { padding: 4px 9px; }
+/* inside a light OS menu bar (SPARK/OS): dark ink, compact, right of the menus */
+.gx-chapters.is-menubar { left: auto; right: 440px; transform: none; color: #2b2722; }
+.gx-chapters.is-menubar b { color: #c4471a; }
+.gx-chapters.is-menubar a.is-next { color: #c4471a; }
+.gx-chapters.is-menubar a:hover, .gx-chapters.is-menubar a:focus-visible { background: rgba(0, 0, 0, .07); }
+.gx-chapters.is-menubar i, .gx-chapters.is-menubar .gx-ch-title { display: none; }
+@media (max-width: 900px) { .gx-chapters .gx-ch-title, .gx-chapters i { display: none; } }
+@media (max-width: 640px) { .gx-chapters { top: auto; bottom: 12px; } .gx-chapters.is-menubar { top: auto; bottom: 64px; left: 50%; right: auto; transform: translateX(-50%); } }

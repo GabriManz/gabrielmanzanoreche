@@ -66,5 +66,10 @@ Default monument proposal (to confirm):
 - [x] WP4 SparkLab rework to frame scan (`src/shared/framescan.ts`: generator + detector).
 - [x] WP5 C inset → x–y frame view + ROI ΔF/F0 trace.
 - [x] Index cards moved to `src/shared/catalogue.ts` and used by A's notebook.
-- [ ] WP3 detail pass on A · [ ] WP6 chapter integration/transitions · [ ] WP7 production.
+- [x] WP6 (first pass) chapter integration: iris transitions (`src/shared/transition.ts`) and a
+      chapter bar (`src/shared/chapters.ts`). Microscope → eyepiece → "Enter the cell" → Ch. 1 (C);
+      computer → camera flies into the screen → Ch. 2 (E); window on Barcelona → "Watch Barcelona
+      beat" → Ch. 3 (D). Chapters link Room ← · prev · next.
+- [ ] WP3 detail pass on A (incl. better city models) · [ ] WP6b seamless single-page transitions
+      (shared renderer) · [ ] WP7 production.
 - Open: confirm the chronological order of the cities (currently Baza → Granada → Madrid → Barcelona).
