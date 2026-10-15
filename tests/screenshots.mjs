@@ -12,7 +12,11 @@ const routes = process.argv.slice(3).length ? process.argv.slice(3) : [
 const viewports = { desktop: { width: 1440, height: 900 }, mobile: { width: 390, height: 844 } };
 mkdirSync('docs/screenshots', { recursive: true });
 
+import { existsSync } from 'node:fs';
+// The cloud image ships a Chromium build that may not match this Playwright version.
+const bundled = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 const browser = await chromium.launch({
+  executablePath: process.env.CHROME_PATH ?? (existsSync(bundled) ? bundled : undefined),
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
 for (const route of routes) {

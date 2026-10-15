@@ -1,0 +1,84 @@
+:root:root {
+  --gx-fg: #f4ead8;
+  --gx-muted: rgba(244, 234, 216, 0.62);
+  --gx-bg: rgba(20, 14, 10, 0.78);
+  --gx-accent: #ffb35c;
+  --gx-font: 'Inter Variable', system-ui, sans-serif;
+  --gx-display: 'Fraunces Variable', Georgia, serif;
+}
+html, body { margin: 0; height: 100%; background: #050407; overflow: hidden; }
+.sr-canvas { position: fixed; inset: 0; display: block; }
+
+.sr-card {
+  position: fixed; left: clamp(16px, 4vw, 56px); bottom: clamp(20px, 6vh, 64px); max-width: 430px;
+  color: var(--gx-fg); font-family: var(--gx-font); pointer-events: none;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, .7); transition: opacity .6s;
+}
+.sr-card h1 {
+  font: 380 clamp(34px, 4.6vw, 60px)/1 var(--gx-display); font-variation-settings: 'SOFT' 100, 'opsz' 144;
+  margin: 8px 0 14px; letter-spacing: -.01em;
+}
+.sr-eyebrow { font: 500 11px/1 'IBM Plex Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--gx-accent); margin: 0; }
+.sr-tag { font: italic 300 18px/1.45 var(--gx-display); margin: 0 0 18px; color: var(--gx-fg); }
+.sr-hint { font-size: 12px; color: var(--gx-muted); margin: 0; }
+kbd { font: 11px 'IBM Plex Mono', monospace; border: 1px solid currentColor; border-radius: 4px; padding: 1px 5px; }
+.is-focused .sr-card { opacity: 0; }
+
+.sr-hotspots { position: fixed; inset: 0; pointer-events: none; z-index: 20; }
+.sr-spot {
+  position: absolute; left: 0; top: 0; pointer-events: auto; background: none; border: 0; padding: 0;
+  color: var(--gx-fg); cursor: pointer; display: flex; align-items: center; gap: 10px;
+  margin: -9px 0 0 -9px; transition: opacity .4s;
+}
+.sr-spot.is-off { opacity: 0; pointer-events: none; }
+.sr-dot {
+  width: 18px; height: 18px; border-radius: 50%; position: relative; flex: none;
+  background: radial-gradient(circle, #ffd9a0 0 3px, transparent 4px);
+}
+.sr-dot::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(255, 217, 160, .8);
+  animation: sr-pulse 2.6s ease-out infinite;
+}
+@keyframes sr-pulse { 0% { transform: scale(.5); opacity: 1 } 100% { transform: scale(1.8); opacity: 0 } }
+.sr-label {
+  display: grid; gap: 2px; text-align: left; padding: 7px 11px; border-radius: 6px; white-space: nowrap;
+  background: var(--gx-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255, 217, 160, .18);
+  opacity: 0; transform: translateX(-6px); transition: opacity .25s, transform .25s;
+}
+.sr-label b { font: 500 13px var(--gx-font); }
+.sr-label i { font: normal 10px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: var(--gx-accent); text-transform: uppercase; }
+.sr-spot.is-hot .sr-label, .sr-spot:focus-visible .sr-label { opacity: 1; transform: none; }
+
+.sr-eyepiece {
+  position: fixed; inset: 0; z-index: 60; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  align-items: center; gap: 48px; padding: 72px clamp(16px, 5vw, 80px) 32px;
+  background: radial-gradient(circle at 35% 50%, #04140b 0, #000 60%); color: var(--gx-fg);
+  font: 15px/1.55 var(--gx-font); animation: sr-fade .6s ease;
+}
+@keyframes sr-fade { from { opacity: 0 } }
+.sr-ep-view {
+  justify-self: center; width: min(70vh, 100%); aspect-ratio: 1; border-radius: 50%; overflow: hidden; position: relative;
+  box-shadow: 0 0 0 10px #050505, 0 0 0 11px #222, 0 0 120px rgba(40, 255, 140, .12), inset 0 0 80px #000;
+}
+.sr-ep-view canvas { width: 100%; height: 100%; display: block; filter: blur(.4px) contrast(1.1); }
+.sr-ep-view::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 90px 30px #000; }
+.sr-ep-scale {
+  position: absolute; right: 22%; bottom: 18%; font: 11px 'IBM Plex Mono', monospace; color: #cfe;
+  border-top: 2px solid #cfe; padding-top: 4px; width: 60px; text-align: center; z-index: 1;
+}
+.sr-ep-text h2 { font: 400 32px/1.1 var(--gx-display); color: var(--gx-accent); margin: 14px 0 6px; }
+.sr-ep-text h3 { font-size: 15px; margin: 16px 0 2px; }
+.sr-ep-text p { margin: 0; color: var(--gx-muted); }
+.sr-ep-note { font: 11px/1.5 'IBM Plex Mono', monospace; margin-top: 18px !important; }
+.sr-ep-close {
+  margin-top: 22px; background: none; border: 1px solid var(--gx-accent); color: var(--gx-fg); border-radius: 99px;
+  padding: 10px 18px; font: 500 13px var(--gx-font); cursor: pointer;
+}
+@media (max-width: 760px) {
+  .sr-eyepiece { grid-template-columns: 1fr; overflow: auto; align-items: start; gap: 20px; padding-top: 64px; }
+  .sr-ep-view { width: min(78vw, 46vh); }
+  .sr-card { right: 16px; }
+  .sr-card h1 { font-size: 34px; }
+  .sr-tag { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { .sr-dot::after { animation: none; } .sr-eyepiece { animation: none; } }
