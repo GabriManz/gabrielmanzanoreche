@@ -407,7 +407,7 @@ if 'render' in STEPS:
         o.hide_render = True
     bc = lib.camera('backdrop_cam', (0, -1.5, 1.6), (0, 12, 1.6), lens=30)
     lib.cycles(samples=32, w=2048, h=1024, denoise=True)
-    lib.render_still(os.path.join(lib.PUBLIC, 'textures', 'signal-room-city.jpg'), quality=85)
+    lib.render_still(os.path.join(lib.OUT, 'signal-room-city.jpg'), quality=85)  # legacy single-city backdrop; the window now uses blender/city_views.py
     for o in bpy.data.objects:
         o.hide_render = False
     scn.camera = cam

@@ -1,13 +1,17 @@
-/** The card catalogue: research + projects as typed index cards you flip through. */
-import { research, projects, publications } from '../../shared/content';
+/** The card catalogue: research, projects and bibliography as typed index cards you flip through.
+ *  Born in concept B (Research Archive); reused as the Signal Room notebook's drawer. */
+import '@fontsource/special-elite';
+import '@fontsource/ibm-plex-sans-condensed/600.css';
+import './catalogue.css';
+import { research, projects, publications } from './content';
 
-export function openCatalogue() {
+export function openCatalogue(start: 'RESEARCH' | 'PROJECTS' | 'BIBLIOGRAPHY' = 'RESEARCH') {
   const cards = [
     ...research.map((r, i) => ({ no: `R.${i + 1}`, drawer: 'RESEARCH', ...r })),
     ...projects.map((r, i) => ({ no: `P.${i + 1}`, drawer: 'PROJECTS', ...r })),
     ...publications.map((r, i) => ({ no: `B.${i + 1}`, drawer: 'BIBLIOGRAPHY', ...r })),
   ];
-  let i = 0;
+  let i = Math.max(0, cards.findIndex((c) => c.drawer === start));
   const wrap = document.createElement('div');
   wrap.className = 'ra-cat';
   wrap.setAttribute('role', 'dialog');
@@ -29,7 +33,7 @@ export function openCatalogue() {
     wrap.querySelector('.ra-cat-count')!.textContent = `${i + 1} / ${cards.length}`;
   };
   const step = (d: number) => { i = (i + d + cards.length) % cards.length; render(); };
-  const close = () => { wrap.remove(); removeEventListener('keydown', onKey); };
+  const close = () => { wrap.remove(); removeEventListener('keydown', onKey); dispatchEvent(new Event('gx:catalogue-closed')); };
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') close();
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') step(1);

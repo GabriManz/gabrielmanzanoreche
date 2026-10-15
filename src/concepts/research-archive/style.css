@@ -66,35 +66,6 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #030807; }
 .ra-term-in { display: flex; gap: 8px; margin-top: 6px; }
 .ra-term-in input { flex: 1; background: none; border: 0; color: inherit; font: inherit; text-shadow: inherit; outline: none; caret-color: #ffb347; }
 
-/* card catalogue */
-.ra-cat {
-  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; align-content: center; gap: 28px;
-  background: radial-gradient(circle, rgba(10, 20, 18, .7), rgba(0, 0, 0, .92)); animation: ra-in .4s ease;
-}
-@keyframes ra-in { from { opacity: 0 } }
-.ra-cat-stack { position: relative; width: min(560px, 88vw); aspect-ratio: 5 / 3; cursor: pointer; }
-.ra-card-i {
-  position: absolute; inset: 0; box-sizing: border-box; padding: 22px 28px; color: #2a2318;
-  background: #efe6cf linear-gradient(transparent 0 46px, #c9473b 46px 47px, transparent 47px) ;
-  background-image: linear-gradient(transparent 0 46px, #c9473b 46px 47px, transparent 47px),
-    repeating-linear-gradient(transparent 0 25px, rgba(60, 110, 160, .22) 25px 26px);
-  background-position: 0 0, 0 52px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .5); font-family: 'Special Elite', monospace; border-radius: 3px;
-  transform: translateY(calc(var(--k) * -14px)) scale(calc(1 - max(var(--k), -1 * var(--k)) * .04));
-  opacity: calc(1 - max(var(--k), 0) * 2); z-index: calc(10 - var(--k)); transition: transform .45s, opacity .45s;
-}
-.ra-card-i header { display: flex; justify-content: space-between; font-size: 13px; letter-spacing: .1em; }
-.ra-card-i h2 { font: 22px/1.25 'Special Elite', monospace; margin: 22px 0 8px; }
-.ra-card-i p { font-size: 15px; line-height: 26px; margin: 0; }
-.ra-card-i footer { position: absolute; bottom: 14px; left: 28px; font-size: 11px; letter-spacing: .12em; opacity: .7; }
-.ra-card-i.is-ph h2 { color: #8a3a2a; }
-.ra-cat-nav { display: flex; gap: 14px; align-items: center; color: var(--gx-fg); font: 600 12px var(--gx-font); letter-spacing: .14em; text-transform: uppercase; }
-.ra-cat-nav button { background: var(--gx-bg); color: var(--gx-fg); border: 1px solid var(--gx-accent); padding: 8px 14px; font: inherit; cursor: pointer; }
 @media (max-width: 640px) {
   .ra-card h1 { font-size: 40px; }
-  .ra-card-i { padding: 16px 18px; }
-  .ra-card-i h2 { font-size: 17px; margin-top: 14px; }
-  .ra-card-i p { font-size: 13px; line-height: 22px; }
-  .ra-cat-stack { aspect-ratio: 4 / 3.4; }
 }
-@media (prefers-reduced-motion: reduce) { .ra-card-i, .ra-cat { transition: none; animation: none; } }

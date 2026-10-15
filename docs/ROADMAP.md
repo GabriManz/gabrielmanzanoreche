@@ -49,3 +49,22 @@ Default monument proposal (to confirm):
 - **Granada**: Alhambra (Torre de la Vela) with Sierra Nevada.
 - **Madrid**: Palacio Real / Almudena, or Cuatro Torres and the Edificio Metrópolis.
 - **Barcelona**: Sagrada Família, Torre Glòries, Collserola tower on the ridge.
+
+## Decisions received (round 2)
+- Cities, in order shown: **Baza** (Co-catedral de la Encarnación on the Plaza Mayor,
+  Dama de Baza, Cascamorras), **Granada** (Alhambra + Sierra Nevada), **Madrid**
+  (Palacio Real + El Oso y el Madroño), **Barcelona** (Sagrada Família, Torre Glòries,
+  Collserola). The window **cycles** between them.
+- Frame-scan parameters (illustrative demos only, synthetic data): Fluo-4, human atrial
+  cardiomyocytes, DX = 0.060184 µm/px, DT = 5.820 ms/frame.
+- B's index cards are **reused** (notebook → records / publications drawer).
+- Real content (projects, publications, contact) is **on hold**.
+
+## Status
+- [x] WP2 window of cities: `blender/city_views.py` → `public/assets/textures/window-*.jpg`,
+      cross-fade + captions in `src/concepts/signal-room/cityWindow.ts`.
+- [x] WP4 SparkLab rework to frame scan (`src/shared/framescan.ts`: generator + detector).
+- [x] WP5 C inset → x–y frame view + ROI ΔF/F0 trace.
+- [x] Index cards moved to `src/shared/catalogue.ts` and used by A's notebook.
+- [ ] WP3 detail pass on A · [ ] WP6 chapter integration/transitions · [ ] WP7 production.
+- Open: confirm the chronological order of the cities (currently Baza → Granada → Madrid → Barcelona).

@@ -13,7 +13,7 @@ import './style.css';
 import { mountChrome, createLoader, openPanel } from '../../shared/chrome';
 import { prefersReducedMotion, url } from '../../shared/env';
 import { mountTerminal } from './terminal';
-import { openCatalogue } from './catalogue';
+import { openCatalogue } from '../../shared/catalogue';
 import { fitQuad } from './homography';
 
 type Pt = [number, number];

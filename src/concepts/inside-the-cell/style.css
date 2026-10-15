@@ -168,6 +168,8 @@ body { font-family: var(--gx-font); -webkit-font-smoothing: antialiased; overscr
 .itc-stats b { color: var(--gx-fg); font-weight: 500; font-variant-numeric: tabular-nums; }
 .itc-scan, .itc-trace { margin: 0; }
 .itc-scan canvas, .itc-trace canvas { display: block; width: 100%; height: auto; image-rendering: auto; border: 1px solid rgba(220, 214, 255, .12); }
+.itc-scan .itc-roi { margin-top: 4px; }
+.itc-roi-key { display: inline-block; width: 10px; height: 2px; background: #ffc23a; vertical-align: middle; margin-right: 6px; }
 .itc-scan figcaption { display: flex; justify-content: space-between; margin-top: 5px; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; }
 .itc-panel .itc-row { margin-top: 12px; gap: 8px; }
 .itc-panel .itc-btn { padding: 9px 10px; font-size: 9.5px; letter-spacing: .12em; }
@@ -218,7 +220,10 @@ body.is-moving .itc-call, body.is-moving .itc-panel { opacity: 0; transition: op
   .itc-btn { padding: 11px 13px; }
   body[data-stop="cell"] .itc-body, body[data-stop="dyad"] .itc-body { display: none; }
   .itc-panel { left: 16px; right: 16px; width: auto; bottom: auto; top: 128px; padding: 12px; }
-  .itc-scan canvas { height: 56px; }
+  .itc-scan { display: grid; grid-template-columns: 1.25fr 1fr; gap: 0 6px; align-items: stretch; }
+  .itc-scan .itc-fs { height: auto; }
+  .itc-scan .itc-roi { height: 100%; margin-top: 0; }
+  .itc-scan figcaption { grid-column: 1 / -1; }
   .itc-trace canvas { height: 52px; }
   .itc-note { display: none; }
   .itc-foot { right: 16px; bottom: 30px; gap: 16px; }

@@ -9,14 +9,14 @@ import { url } from '../../shared/env';
 const CONCEPTS = [
   {
     slug: 'signal-room', letter: 'A', name: 'The Signal Room',
-    line: 'A Barcelona attic at night. Every object on the desk is a door into the work.',
+    line: 'The home of the site: an attic at night whose window cycles through the cities I have lived in. Every object is a door into the work.',
     tags: ['Blender · Cycles bake', 'Real-time 3D', 'Hotspots'],
     interaction: 'Fly to objects; look through the microscope.',
   },
   {
     slug: 'research-archive', letter: 'B', name: 'The Research Archive',
     line: 'A hazy retro-futurist archive of index cards, film reels and CRTs.',
-    tags: ['Blender · Cycles volumetrics', 'Pre-rendered 2.5D', 'CRT terminal'],
+    tags: ['Discarded direction', 'Index cards reused in A'],
     interaction: 'Walk between plates; query the Archivist; flip index cards.',
   },
   {
@@ -33,9 +33,9 @@ const CONCEPTS = [
   },
   {
     slug: 'digital-station', letter: 'E', name: 'Digital Research Station',
-    line: 'SPARK/OS — a fictional scientific workstation with working analysis apps.',
+    line: 'SPARK/OS — a fictional scientific workstation. SparkLab runs a frame-scan (x–y–t) spark analysis on synthetic data.',
     tags: ['2D OS', 'SparkLab detector', 'Terminal'],
-    interaction: 'Open apps; run spark detection on synthetic data.',
+    interaction: 'Play the x–y–t movie; run detection; inspect each spark.',
   },
 ];
 

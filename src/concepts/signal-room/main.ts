@@ -10,11 +10,13 @@ import '@fontsource-variable/fraunces';
 import '@fontsource-variable/inter';
 import '@fontsource/ibm-plex-mono';
 import './style.css';
-import { mountChrome, createLoader, openPanel, onPanelClose, sectionHTML } from '../../shared/chrome';
+import { mountChrome, createLoader, openPanel, onPanelClose } from '../../shared/chrome';
 import { person } from '../../shared/content';
 import { prefersReducedMotion, isTouch, url } from '../../shared/env';
 import { createScreen } from './screen';
 import { openEyepiece } from './eyepiece';
+import { openCatalogue } from '../../shared/catalogue';
+import { createCityWindow, CITIES } from './cityWindow';
 
 const EXPOSURE = 2.0; // must match blender/bake.py
 
@@ -22,11 +24,7 @@ type Spot = { label: string; kicker: string; open: () => void };
 const SPOTS: Record<string, Spot> = {
   microscope: { label: 'Microscope', kicker: 'Imaging · calcium signalling', open: () => openEyepiece() },
   computer: { label: 'Workstation', kicker: 'Software · GitHub', open: () => openPanel('projects') },
-  notebook: {
-    label: 'Research notebook', kicker: 'Notes · publications',
-    open: () => openPanel({ title: 'Research notebook', html: sectionHTML('research').replace(/<h2>.*?<\/h2>/, '') +
-      `<h3>Publications</h3><p class="is-placeholder">[Placeholder] No publications listed yet — only verified references will appear here.</p>` }),
-  },
+  notebook: { label: 'Research notebook', kicker: 'Records · publications', open: () => openCatalogue('BIBLIOGRAPHY') },
   poster: {
     label: 'Conference poster', kicker: 'Talks · posters',
     open: () => openPanel({ title: 'Conferences & presentations', html:
@@ -70,29 +68,21 @@ function start() {
   const heroView = () => (innerWidth / innerHeight < 0.9 ? HERO_PORTRAIT : HERO);
   Object.assign(view, { pos: heroView().pos.clone(), target: heroView().target.clone(), focal: heroView().focal });
 
-  // --- city backdrop behind the window (Cycles render of the procedural city)
-  const cityTex = new THREE.TextureLoader().load(url('assets/textures/signal-room-city.jpg'));
-  cityTex.colorSpace = THREE.SRGBColorSpace;
-  const cityMat = new THREE.ShaderMaterial({
-    uniforms: { map: { value: cityTex }, t: { value: 0 } },
-    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
-    fragmentShader: `uniform sampler2D map; uniform float t; varying vec2 vUv;
-      float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
-      void main(){
-        vec3 c = texture2D(map, vUv).rgb;
-        // individual windows switching on/off very slowly — the city is alive
-        vec2 cell = floor(vUv*vec2(330.,165.));
-        float flick = step(0.985, h(cell + floor(t*0.15 + h(cell)*10.)));
-        float lum = dot(c, vec3(.3,.6,.1));
-        c *= 1. - flick*smoothstep(.2,.6,lum)*.85;
-        gl_FragColor = vec4(c, 1.);
-        #include <colorspace_fragment>
-      }`,
-    toneMapped: false,
+  // --- the window: night views of the cities Gabriel has lived in, cross-fading
+  const caption = document.createElement('p');
+  caption.className = 'sr-city';
+  caption.setAttribute('aria-live', 'polite');
+  document.body.append(caption);
+  const cityWin = createCityWindow(scene, b2t, [1.65, -1.7, 1.55], [0, 1.89, 1.725], {
+    reduced,
+    onChange: (c) => {
+      const n = CITIES.indexOf(c) + 1;
+      caption.innerHTML = `<span>Places I've lived · ${n}/${CITIES.length}</span><b>${c.name}</b><i>${c.landmarks}</i>`;
+      caption.classList.remove('is-in'); void caption.offsetWidth; caption.classList.add('is-in');
+      const w = anchors.find((a) => a.key === 'window');
+      if (w) w.el.querySelector('i')!.textContent = `Places I've lived · ${c.name}`;
+    },
   });
-  const city = new THREE.Mesh(new THREE.PlaneGeometry(16.2, 8.1), cityMat);
-  city.position.copy(b2t(0, 12, 1.6));
-  scene.add(city);
 
   // --- load the baked room
   const pickables: THREE.Mesh[] = [];
@@ -176,6 +166,13 @@ function start() {
       layer.append(el);
       anchors.push({ el, p, key });
     }
+    const wEl = document.createElement('button');
+    wEl.className = 'sr-spot';
+    wEl.innerHTML = `<span class="sr-dot"></span><span class="sr-label"><b>Window</b><i>Places I've lived · ${cityWin.current().name}</i></span>`;
+    wEl.setAttribute('aria-label', "Window — show the next city I've lived in");
+    wEl.addEventListener('click', () => cityWin.next());
+    layer.append(wEl);
+    anchors.push({ el: wEl, p: b2t(-0.65, 1.8, 2.25), key: 'window' });
   }
 
   // --- hover highlight (brighten baked material) + raycast picking
@@ -202,7 +199,9 @@ function start() {
   });
   renderer.domElement.addEventListener('click', (e) => {
     const k = pick(e as PointerEvent);
-    if (k) focusOn(k);
+    if (k) return focusOn(k);
+    // clicking the view through the window advances to the next city
+    if (ray.intersectObject(scene, true)[0]?.object === cityWin.mesh) cityWin.next();
   });
 
   // --- camera flights
@@ -235,6 +234,7 @@ function start() {
   onPanelClose(() => focused && back());
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && focused && !document.querySelector('dialog[open]')) back(); });
   addEventListener('sr:eyepiece-closed', () => back());
+  addEventListener('gx:catalogue-closed', () => focused && back());
 
   addEventListener('resize', () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -263,7 +263,7 @@ function start() {
     camera.aspect = innerWidth / innerHeight;
     camera.setFocalLength(view.focal);
     camera.lookAt(view.target);
-    cityMat.uniforms.t.value = t;
+    cityWin.update(t);
     if (dust) {
       dust.rotation.y = Math.sin(t * 0.05) * 0.02;
       dust.position.y = Math.sin(t * 0.3) * 0.01;

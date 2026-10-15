@@ -88,3 +88,16 @@ kbd { font: 11px 'IBM Plex Mono', monospace; border: 1px solid currentColor; bor
   font: 15px/1.5 var(--gx-font); text-align: center; z-index: 30;
 }
 .sr-error a { color: var(--gx-accent); }
+.sr-city {
+  position: fixed; right: clamp(16px, 4vw, 56px); bottom: clamp(20px, 6vh, 64px); margin: 0; max-width: 340px;
+  display: grid; gap: 2px; text-align: right; color: var(--gx-fg); font-family: var(--gx-font); pointer-events: none;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .8); transition: opacity .6s;
+}
+.sr-city span { font: 500 10px 'IBM Plex Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--gx-accent); }
+.sr-city b { font: 400 28px/1.1 var(--gx-display); }
+.sr-city i { font-style: normal; font-size: 12px; color: var(--gx-muted); }
+.sr-city.is-in { animation: sr-city-in 1.2s ease both; }
+@keyframes sr-city-in { from { opacity: 0; transform: translateY(6px); } }
+.is-focused .sr-city { opacity: 0; }
+@media (max-width: 760px) { .sr-city { left: 16px; right: auto; text-align: left; bottom: auto; top: 64px; } .sr-city b { font-size: 22px; } }
+@media (prefers-reduced-motion: reduce) { .sr-city.is-in { animation: none; } }

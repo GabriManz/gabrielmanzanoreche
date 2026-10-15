@@ -101,8 +101,9 @@ function boot() {
       </div>
       <div class="itc-stats"><span>Spontaneous events <b class="v-sp">0</b>/s</span><span>Recruited <b class="v-rc">0</b>/s</span></div>
       <figure class="itc-scan">
-        <canvas width="300" height="100"></canvas>
-        <figcaption><span>Line-scan x–t · synthetic</span><span>t →</span></figcaption>
+        <canvas class="itc-fs" width="300" height="72" role="img" aria-label="Frame scan: the current x–y frame of the model cell's calcium fluorescence, with a region of interest box"></canvas>
+        <canvas class="itc-roi" width="300" height="46" role="img" aria-label="ΔF/F0 over time inside the region of interest"></canvas>
+        <figcaption><span>Frame scan x–y · synthetic</span><span><i class="itc-roi-key"></i>ROI ΔF/F₀ · t →</span></figcaption>
       </figure>
       <div class="itc-row">
         <button class="itc-btn ghost" data-act="pace" aria-pressed="true">Pacing on</button>
@@ -200,7 +201,7 @@ function boot() {
   });
   $('[data-act="spark"]')!.addEventListener('click', () => cell.sim.spark());
 
-  // line-scan + trace canvases
+  // frame-scan inset + trace canvases
   const LUT = new Uint8ClampedArray(256 * 3);
   for (let i = 0; i < 256; i++) {
     const v = (i / 255) * 1.3;
@@ -213,27 +214,73 @@ function boot() {
     LUT[i * 3 + 1] = Math.min(255, Math.pow(g * k, 0.6) * 255);
     LUT[i * 3 + 2] = Math.min(255, Math.pow(b * k, 0.6) * 255);
   }
-  const scan = ($('.itc-scan canvas') as HTMLCanvasElement).getContext('2d')!;
-  scan.fillStyle = '#05030c'; scan.fillRect(0, 0, 300, 100);
-  const col = scan.createImageData(1, 100);
-  let scanAcc = 0, traceAcc = 0;
+  // Frame-scan inset: each "frame" is the whole x–y fluorescence field of the toy cell model
+  // (grid 200 × 48 ≈ 100 × 24 µm), plus the ΔF/F0 time course of one region of interest.
+  const fsCv = $('.itc-fs') as HTMLCanvasElement;
+  const fs = fsCv.getContext('2d')!;
+  const roiCv = $('.itc-roi') as HTMLCanvasElement;
+  const roiX = roiCv.getContext('2d')!;
+  const { nx: FX, ny: FY } = cell.sim;
+  const frameCv = document.createElement('canvas');
+  frameCv.width = FX; frameCv.height = FY;
+  const frameX = frameCv.getContext('2d')!;
+  const frameImg = frameX.createImageData(FX, FY);
+  const ROI = { x: 94, y: 18, w: 12, h: 12 };   // grid cells (≈ 6 × 6 µm)
+  const F_REST = 0.15;                           // resting fluorescence offset of the toy field
+  const roiHist = new Float32Array(300);
+  // resting image for display: dim, with faint striation at the release-site columns (Z-lines, every ~2 µm)
+  const restImg = new Float32Array(FX * FY);
+  for (let y = 0; y < FY; y++) for (let x = 0; x < FX; x++) {
+    const edge = Math.min(y, FY - 1 - y) < 2 ? 0.6 : 1;
+    restImg[y * FX + x] = edge * (0.05 + 0.025 * (0.5 + 0.5 * Math.cos((2 * Math.PI * (x - 2)) / 4)));
+  }
+  let scanAcc = 0, traceAcc = 0, roiMax = 2;
   function drawScan(dt: number) {
-    scanAcc += dt * 42;            // columns per second (time-based, frame-rate independent)
+    scanAcc += dt * 42;            // frames per second of the inset (time-based, frame-rate independent)
     const n = Math.min(60, Math.floor(scanAcc));
     if (n < 1) return;
     scanAcc -= n;
-    const { nx, ny, c } = cell.sim;
-    const y0 = Math.floor(ny / 2) - 2;
-    scan.drawImage(scan.canvas, -n, 0);
-    for (let py = 0; py < 100; py++) {
-      const x = Math.floor((py / 100) * nx);
-      let v = 0;
-      for (let dy = 0; dy < 4; dy++) v += c[(y0 + dy) * nx + x] + c[(y0 + dy) * nx + Math.min(nx - 1, x + 1)];
-      v = 0.05 + v / 8;
+    const c = cell.sim.c;
+    // ROI ΔF/F0 for this frame
+    let acc = 0;
+    for (let y = ROI.y; y < ROI.y + ROI.h; y++) for (let x = ROI.x; x < ROI.x + ROI.w; x++) acc += c[y * FX + x];
+    const dff = acc / (ROI.w * ROI.h) / F_REST;
+    roiHist.copyWithin(0, n);
+    for (let k = 0; k < n; k++) roiHist[299 - k] = dff + (Math.random() - 0.5) * 0.08;
+    if (!document.body.contains(fsCv) || cellPanel.hidden) return;
+    // x–y frame with a little shot-noise-like grain
+    const d = frameImg.data;
+    for (let i = 0; i < FX * FY; i++) {
+      const F = restImg[i] + c[i];
+      const v = Math.max(0, F + (Math.random() - 0.5) * 0.16 * Math.sqrt(F));
       const li = Math.min(255, Math.floor(v * 190)) * 3;
-      col.data[py * 4] = LUT[li]; col.data[py * 4 + 1] = LUT[li + 1]; col.data[py * 4 + 2] = LUT[li + 2]; col.data[py * 4 + 3] = 255;
+      d[i * 4] = LUT[li]; d[i * 4 + 1] = LUT[li + 1]; d[i * 4 + 2] = LUT[li + 2]; d[i * 4 + 3] = 255;
     }
-    for (let k = 0; k < n; k++) scan.putImageData(col, 299 - k, 0);
+    frameX.putImageData(frameImg, 0, 0);
+    const sx = fsCv.width / FX, sy = fsCv.height / FY;
+    fs.imageSmoothingEnabled = true;
+    fs.drawImage(frameCv, 0, 0, fsCv.width, fsCv.height);
+    fs.strokeStyle = '#ffffff'; fs.lineWidth = 1;
+    fs.strokeRect(ROI.x * sx + 0.5, ROI.y * sy + 0.5, ROI.w * sx, ROI.h * sy);
+    fs.font = '8px "JetBrains Mono Variable", monospace';
+    fs.fillStyle = 'rgba(255,255,255,.9)';
+    fs.fillText('ROI', ROI.x * sx, ROI.y * sy - 3);
+    fs.fillRect(fsCv.width - 6 - 20 * sx, fsCv.height - 6, 20 * sx, 2);   // 20 grid cells ≈ 10 µm
+    fs.fillText('10 µm', fsCv.width - 6 - 20 * sx, fsCv.height - 10);
+    // ROI trace
+    let mx = 0;
+    for (let i = 0; i < 300; i++) if (roiHist[i] > mx) mx = roiHist[i];
+    roiMax += (Math.max(2, mx * 1.15) - roiMax) * 0.05;
+    const H = roiCv.height, Y = (v: number) => H - 6 - (v / roiMax) * (H - 12);
+    roiX.clearRect(0, 0, 300, H);
+    roiX.strokeStyle = 'rgba(180,170,255,.14)'; roiX.lineWidth = 1;
+    roiX.beginPath(); roiX.moveTo(0, Y(0) + 0.5); roiX.lineTo(300, Y(0) + 0.5); roiX.stroke();
+    roiX.fillStyle = 'rgba(200,190,255,.5)'; roiX.font = '8px "JetBrains Mono Variable", monospace';
+    roiX.fillText('0', 2, Y(0) - 2); roiX.fillText(roiMax.toFixed(1), 2, 9);
+    roiX.strokeStyle = '#ffc23a'; roiX.lineWidth = 1.4;
+    roiX.beginPath();
+    for (let x = 0; x < 300; x++) { const y = Y(roiHist[x]); x ? roiX.lineTo(x, y) : roiX.moveTo(x, y); }
+    roiX.stroke();
   }
   const trace = ($('.itc-trace canvas') as HTMLCanvasElement).getContext('2d')!;
   const tr = new Float32Array(300).fill(1);
@@ -521,7 +568,7 @@ function boot() {
   (window as unknown as { __itcAdvance: (s: number) => void }).__itcAdvance = (s: number) => {
     for (let i = 0; i < s * 60; i++) { cell.update(clock, 1 / 60, true); drawScan(1 / 60); }
   };
-  // pre-roll the cell model a few seconds so the line-scan opens with history
+  // pre-roll the cell model a few seconds so the frame-scan ROI trace opens with history
   for (let i = 0; i < 430; i++) { cell.update(i / 60, 1 / 60, true); drawScan(1 / 60); }
 
   // warm up shaders, then go

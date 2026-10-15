@@ -2,7 +2,7 @@
  * Concept E — "Digital Research Station".
  * SPARK/OS: a fictional late-90s scientific workstation that is Gabriel's lab
  * desktop. Visitors explore by opening applications; SparkLab runs a real
- * (small) detection algorithm on a synthetic confocal line-scan.
+ * (small) detection algorithm on a synthetic confocal frame-scan (x–y–t) movie.
  */
 import '@fontsource/ibm-plex-sans/400.css';
 import '@fontsource/ibm-plex-sans/500.css';
@@ -21,7 +21,7 @@ import { icons, logo } from './icons';
 import { mountSparkLab, type SparkLabApi } from './sparklab';
 import { mountTerminal, mountNotebook, mountProjects, mountAtlas, mountMail, mountAbout, esc } from './apps';
 import { paintWallpaper } from './wallpaper';
-import { generate, render } from './analysis';
+import { DEFAULT_SEED, fileName, series, paintRaw, heroFrame } from './analysis';
 
 mountChrome({ concept: 'Digital Research Station', status: 'SPARK/OS desktop · windows, terminal, synthetic SparkLab analysis' });
 document.body.classList.add('ds');
@@ -35,7 +35,7 @@ let spark: SparkLabApi | null = null;
 let term: ReturnType<typeof mountTerminal> | null = null;
 
 const APPS: AppDef[] = [
-  { id: 'sparklab', title: 'SparkLab', file: 'SparkLab.app', blurb: 'Spark detection on a synthetic line-scan', x: 116, y: 18, w: 864, h: 694, mount: (b, c) => (spark = mountSparkLab(b, c)) },
+  { id: 'sparklab', title: 'SparkLab', file: 'SparkLab.app', blurb: 'Spark detection on a synthetic frame-scan (x–y–t)', x: 104, y: 12, w: 900, h: 790, mount: (b, c) => (spark = mountSparkLab(b, c)) },
   { id: 'terminal', title: 'Terminal', file: 'Terminal', blurb: 'Type help', x: 996, y: 268, w: 428, h: 400, mount: (b, c) => (term = mountTerminal(b, c)) },
   { id: 'notebook', title: 'Notebook', file: 'notebook/', blurb: 'Research themes', x: 300, y: 56, w: 760, h: 540, mount: (b) => mountNotebook(b) },
   { id: 'projects', title: 'Projects', file: 'projects/', blurb: 'File browser', x: 360, y: 110, w: 700, h: 470, mount: (b) => mountProjects(b) },
@@ -66,10 +66,10 @@ main.innerHTML = `
       <p class="launch-tag">${esc(person.tagline)}</p>
     </div>
     <ul class="launch-grid">${APPS.map((a) => `<li><button type="button" data-open="${a.id}"><span class="ds-icon-img">${icons[a.id]}</span><span>${a.title.replace('About This Station', 'About')}</span></button></li>`).join('')}</ul>
-    <button type="button" class="launch-widget" data-open="sparklab" aria-label="Open SparkLab: spark detection on a synthetic line-scan">
-      <span class="lw-head"><b>SparkLab</b><span class="mono">synthetic_002A.lsm</span></span>
-      <canvas width="720" height="192" aria-hidden="true"></canvas>
-      <span class="lw-foot"><span>Detect calcium sparks on a synthetic confocal line-scan</span><span class="lw-go" aria-hidden="true">Run ›</span></span>
+    <button type="button" class="launch-widget" data-open="sparklab" aria-label="Open SparkLab: spark detection on a synthetic confocal frame-scan movie">
+      <span class="lw-head"><b>SparkLab</b><span class="mono">${fileName(DEFAULT_SEED)}</span></span>
+      <canvas width="240" height="120" aria-hidden="true"></canvas>
+      <span class="lw-foot"><span>Detect calcium sparks in a synthetic frame-scan (x–y–t) movie</span><span class="lw-go" aria-hidden="true">Run ›</span></span>
     </button>
     <p class="launch-note mono"><span class="led" aria-hidden="true"></span>synthetic data only</p>
   </section>
@@ -141,7 +141,8 @@ let previewDone = false;
 const preview = () => {
   if (previewDone || !isMobile()) return;
   previewDone = true;
-  render(generate(42), (main.querySelector('.launch-widget canvas') as HTMLCanvasElement).getContext('2d')!, 'green');
+  const s = series(DEFAULT_SEED);
+  paintRaw((main.querySelector('.launch-widget canvas') as HTMLCanvasElement).getContext('2d')!, s, heroFrame(s), 'green');
 };
 preview();
 mq.addEventListener('change', preview);
@@ -181,7 +182,7 @@ function showDesktop() {
     wm.open('terminal', { focus: false });
     term?.exec('whoami');
     wm.open('sparklab', { focus: false });
-    setTimeout(() => spark?.run(), reduced ? 0 : 350);
+    setTimeout(() => spark?.run(undefined, 170), reduced ? 0 : 300);
   }
   requestAnimationFrame(() => requestAnimationFrame(() => { window.__conceptReady = true; }));
 }
@@ -208,7 +209,8 @@ if (skipBoot) {
     ['POST  photomultiplier tube', 'simulated'],
     ['mount /research', 'ok'],
     ['mount /projects', '3 placeholders'],
-    ['loading synthetic dataset  seed=0x002A', 'ok'],
+    ['loading synthetic x–y–t series  seed=0x002A', 'ok'],
+    ['acquisition model  DX 0.060 µm · DT 5.82 ms', 'ok'],
     ['calibrating LUT  green · fire', 'ok'],
     ['starting window server', 'ok'],
   ];
